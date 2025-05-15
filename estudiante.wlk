@@ -20,14 +20,12 @@ class Estudiante {
   
   method promedio() = materiasAprobadas.average{ materia => materia.nota() }
   
-  method aprobo(materia) = materiasAprobadas.any{ aprobacion => aprobacion.materia() == materia }
-  
+  method aprobo(materia) = materiasAprobadas.any{ aprobacion => aprobacion.esLaMateria(materia) }
   
   method materiasDeLasCarreras() = carreras.flatMap{ carrera => carrera.materias() }
   
-  
-  method sePuedeInscribir(materia) = (self.esMateriaDeUnaCarreraQueCursa(materia) && (!self.aprobo(materia))) 
-    && self.aproboTodosLosPrerrequisitosDe(materia) && !materia.estaInscripto(self)
+  method sePuedeInscribir(materia) = self.esMateriaDeUnaCarreraQueCursa(materia) && (!self.aprobo(materia))
+    && self.aproboTodosLosPrerrequisitosDe(materia) && (!materia.estaInscripto(self))
   
   method esMateriaDeUnaCarreraQueCursa(materia) = self.materiasDeLasCarreras().contains(materia)
   
