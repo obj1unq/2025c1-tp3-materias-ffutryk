@@ -39,4 +39,6 @@ class Aprobacion {
   const property estudiante
   const property materia
   const property nota
+
+  method esLaMateria(_materia) = materia === _materia
 }
