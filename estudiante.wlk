@@ -27,13 +27,11 @@ class Estudiante {
   
   
   method sePuedeInscribir(materia) = (self.esMateriaDeUnaCarreraQueCursa(materia) && (!self.aprobo(materia))) 
-    && self.aproboTodosLosPrerrequisitosDe(materia) && self.noEstaInscriptoEn(materia)
+    && self.aproboTodosLosPrerrequisitosDe(materia) && !materia.estaInscripto(self)
   
   method esMateriaDeUnaCarreraQueCursa(materia) = self.materiasDeLasCarreras().contains(materia)
   
   method aproboTodosLosPrerrequisitosDe(materia) = materia.prerrequisitos().all{ prerrequisito => self.aprobo(prerrequisito) }
-  
-  method noEstaInscriptoEn(materia) = !materia.estaInscripto(self)
   
   method materiasEnLasQueEstaInscripto() = self.materiasDeLasCarreras().filter{ materia => materia.estaInscripto(self) }
   
