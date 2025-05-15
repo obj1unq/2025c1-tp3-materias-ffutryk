@@ -1,0 +1,84 @@
+import estudiante.*
+import carrera.*
+import materia.*
+
+describe "Inscripción a materias" {
+  const elpr = new Materia(cupos = 10, prerrequisitos = #{})
+  const mat1 = new Materia(cupos = 10, prerrequisitos = #{})
+  const bbdd = new Materia(cupos = 10, prerrequisitos = #{})
+  const obj1 = new Materia(cupos = 10, prerrequisitos = #{})
+  const obj2 = new Materia(cupos = 3, prerrequisitos = #{obj1, mat1})
+  const obj3 = new Materia(cupos = 10, prerrequisitos = #{obj2, bbdd})
+  const conc = new Materia(cupos = 10, prerrequisitos = #{obj1, bbdd})
+  const quim = new Materia(cupos = 10, prerrequisitos = #{})
+  const bio1 = new Materia(cupos = 10, prerrequisitos = #{})
+  const bio2 = new Materia(cupos = 10, prerrequisitos = #{bio1})
+  const programacion = new Carrera(
+    materias = #{elpr, mat1, bbdd, obj1, obj2, obj3, conc}
+  )
+  const medicina = new Carrera(materias = #{quim, bio1, bio2})
+  const roque = new Estudiante(carreras = #{programacion, medicina})
+  const luisa = new Estudiante(carreras = #{programacion})
+  const romina = new Estudiante(carreras = #{programacion})
+  const alicia = new Estudiante(carreras = #{programacion})
+  const ana = new Estudiante(carreras = #{programacion})
+  
+  method initialize() {
+    roque.aprobar(elpr, 10)
+    roque.aprobar(mat1, 8)
+    roque.aprobar(obj1, 10)
+    roque.aprobar(bbdd, 9)
+    roque.aprobar(quim, 9)
+    roque.aprobar(bio1, 7)
+    
+    luisa.aprobar(elpr, 9)
+    luisa.aprobar(obj1, 9)
+    luisa.aprobar(mat1, 9)
+    
+    romina.aprobar(elpr, 10)
+    romina.aprobar(obj1, 7)
+    romina.aprobar(mat1, 10)
+    
+    alicia.aprobar(elpr, 7)
+    alicia.aprobar(obj1, 10)
+    alicia.aprobar(mat1, 8)
+    
+    ana.aprobar(elpr, 8)
+  }
+  
+  test "Roque puede inscribirse en Objetos 2, pero no en Objetos 3 (porque le falta Objetos 2) ni en Objetos 1 (porque ya la tiene aprobada)." {
+    assert.that(roque.sePuedeInscribir(obj2))
+    assert.notThat(roque.sePuedeInscribir(obj3))
+    assert.notThat(roque.sePuedeInscribir(obj1))
+  }
+  
+  test "Roque puede inscribirse: en Programación, en Objetos 2 y Programación Concurrente; en Medicina, en Biología 2." {
+    assert.that(roque.sePuedeInscribir(obj2))
+    assert.that(roque.sePuedeInscribir(conc))
+    assert.that(roque.sePuedeInscribir(bio2))
+  }
+  
+  test "Si se inscriben, en este orden, Luisa, Romina, Alicia y Roque en Objetos 2, entonces las tres primeras quedan confirmadas, y Roque queda en lista de espera." {
+    obj2.inscribirEstudiante(luisa)
+    obj2.inscribirEstudiante(romina)
+    obj2.inscribirEstudiante(alicia)
+    obj2.inscribirEstudiante(roque)
+    assert.equals(#{luisa, romina, alicia}, obj2.inscriptos())
+    assert.that(obj2.enListaDeEspera(roque))
+  }
+  
+  test "Si después se da de baja Romina en Objetos 2, entonces Roque pasa a tener la inscripción confirmada en esa materia." {
+    obj2.inscribirEstudiante(luisa)
+    obj2.inscribirEstudiante(romina)
+    obj2.inscribirEstudiante(alicia)
+    obj2.inscribirEstudiante(roque)
+    assert.equals(#{luisa, romina, alicia}, obj2.inscriptos())
+    assert.that(obj2.enListaDeEspera(roque))
+    
+    obj2.darDeBaja(romina)
+    
+    assert.equals(#{luisa, alicia, roque}, obj2.inscriptos())
+    assert.notThat(obj2.enListaDeEspera(roque))
+    assert.equals([], obj2.listaDeEspera())
+  }
+}
