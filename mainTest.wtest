@@ -63,6 +63,7 @@ describe "Inscripción a materias" {
     obj2.inscribirEstudiante(romina)
     obj2.inscribirEstudiante(alicia)
     obj2.inscribirEstudiante(roque)
+
     assert.equals(#{luisa, romina, alicia}, obj2.inscriptos())
     assert.that(obj2.enListaDeEspera(roque))
   }
@@ -72,6 +73,7 @@ describe "Inscripción a materias" {
     obj2.inscribirEstudiante(romina)
     obj2.inscribirEstudiante(alicia)
     obj2.inscribirEstudiante(roque)
+    
     assert.equals(#{luisa, romina, alicia}, obj2.inscriptos())
     assert.that(obj2.enListaDeEspera(roque))
     
