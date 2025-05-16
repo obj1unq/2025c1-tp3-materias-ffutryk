@@ -22,21 +22,21 @@ class Estudiante {
   
   method aprobo(materia) = materiasAprobadas.any{ aprobacion => aprobacion.esLaMateria(materia) }
   
-  method materiasDeLasCarreras() = carreras.flatMap{ carrera => carrera.materias() }
+  method materiasDeLasCarreras() = carreras.flatMap{ carrera => carrera.materias() }.asSet()
   
   method esMateriaDeUnaCarreraQueCursa(materia) = carreras.contains(materia.carrera())
   
   method aproboTodosLosPrerrequisitosDe(materia) = materia.prerrequisitos().all{ prerrequisito => self.aprobo(prerrequisito) }
   
-  method materiasEnLasQueEstaInscripto() = self.materiasDeLasCarreras().filter{ materia => materia.estaInscripto(self) }
+  method materiasEnLasQueEstaInscripto() = self.materiasDeLasCarreras().filter{ materia => materia.estaInscripto(self) }.asSet()
   
-  method materiasEnLasQueEstaEnEspera() = self.materiasDeLasCarreras().filter{ materia => materia.enListaDeEspera(self) }
+  method materiasEnLasQueEstaEnEspera() = self.materiasDeLasCarreras().filter{ materia => materia.enListaDeEspera(self) }.asSet()
   
-  method materiasALasQueSePuedeInscribir(carrera) = carrera.materias().filter{ materia => materia.sePuedeInscribir(self) }
+  method materiasALasQueSePuedeInscribir(carrera) = carrera.materias().filter{ materia => materia.sePuedeInscribir(self) }.asSet()
 
   method cantidadDeAprobadasDeLaCarrera(carrera) = self.materiasAprobadasDeLaCarrera(carrera).size()
 
-  method materiasAprobadasDeLaCarrera(carrera) = carrera.materias().filter{ materia => self.aprobo(materia) }
+  method materiasAprobadasDeLaCarrera(carrera) = carrera.materias().filter{ materia => self.aprobo(materia) }.asSet()
   
   method creditosTotales() = materiasAprobadas.fold(0, { prev, aprobacion => prev + aprobacion.creditos() })
 
