@@ -24,10 +24,7 @@ class Estudiante {
   
   method materiasDeLasCarreras() = carreras.flatMap{ carrera => carrera.materias() }
   
-  method sePuedeInscribir(materia) = self.esMateriaDeUnaCarreraQueCursa(materia) && (!self.aprobo(materia))
-    && self.aproboTodosLosPrerrequisitosDe(materia) && (!materia.estaInscripto(self))
-  
-  method esMateriaDeUnaCarreraQueCursa(materia) = self.materiasDeLasCarreras().contains(materia)
+  method esMateriaDeUnaCarreraQueCursa(materia) = carreras.contains(materia.carrera())
   
   method aproboTodosLosPrerrequisitosDe(materia) = materia.prerrequisitos().all{ prerrequisito => self.aprobo(prerrequisito) }
   
@@ -35,8 +32,18 @@ class Estudiante {
   
   method materiasEnLasQueEstaEnEspera() = self.materiasDeLasCarreras().filter{ materia => materia.enListaDeEspera(self) }
   
-  method materiasALasQueSePuedeInscribir(carrera) = carrera.materias().filter{ materia => self.sePuedeInscribir(materia) }
+  method materiasALasQueSePuedeInscribir(carrera) = carrera.materias().filter{ materia => materia.sePuedeInscribir(self) }
+
+  method cantidadDeAprobadasDeLaCarrera(carrera) = self.materiasAprobadasDeLaCarrera(carrera).size()
+
+  method materiasAprobadasDeLaCarrera(carrera) = carrera.materias().filter{ materia => self.aprobo(materia) }
   
+  method creditosTotales() = materiasAprobadas.fold(0, { prev, aprobacion => prev + aprobacion.creditos() })
+
+  method materiasDelAñoAnterior(año) = self.materiasDeLasCarreras().filter{ materia => materia.año() == año - 1 }
+
+  method aproboTodasLasMateriasDelAñoAnterior(año) = self.materiasDelAñoAnterior(año).all{ materia => self.aprobo(materia) }
+
   method validarAprobacion(materia) {
     if (self.aprobo(materia)) self.error("El estudiante ya ha aprobado la materia.")
   }

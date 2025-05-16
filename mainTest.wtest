@@ -1,22 +1,24 @@
 import estudiante.*
 import carrera.*
 import materia.*
+import criterios.*
+import estrategias.*
 
 describe "Inscripción a materias" {
-  const elpr = new Materia(cupos = 10, prerrequisitos = #{})
-  const mat1 = new Materia(cupos = 10, prerrequisitos = #{})
-  const bbdd = new Materia(cupos = 10, prerrequisitos = #{})
-  const obj1 = new Materia(cupos = 10, prerrequisitos = #{})
-  const obj2 = new Materia(cupos = 3, prerrequisitos = #{obj1, mat1})
-  const obj3 = new Materia(cupos = 10, prerrequisitos = #{obj2, bbdd})
-  const conc = new Materia(cupos = 10, prerrequisitos = #{obj1, bbdd})
-  const quim = new Materia(cupos = 10, prerrequisitos = #{})
-  const bio1 = new Materia(cupos = 10, prerrequisitos = #{})
-  const bio2 = new Materia(cupos = 10, prerrequisitos = #{bio1})
-  const programacion = new Carrera(
-    materias = #{elpr, mat1, bbdd, obj1, obj2, obj3, conc}
-  )
-  const medicina = new Carrera(materias = #{quim, bio1, bio2})
+  const programacion = new Carrera()
+  const medicina = new Carrera()
+
+  const elpr = new Materia(cupos = 10, prerrequisitos = #{}, carrera = programacion, estrategia = ordenada, criterio = porPrerrequisitos, año = 1, creditosOtorgados = 6, creditosNecesarios = 0)
+  const mat1 = new Materia(cupos = 10, prerrequisitos = #{}, carrera = programacion, estrategia = ordenada, criterio = porPrerrequisitos, año = 1, creditosOtorgados = 6, creditosNecesarios = 0)
+  const bbdd = new Materia(cupos = 10, prerrequisitos = #{}, carrera = programacion, estrategia = ordenada, criterio = porPrerrequisitos, año = 1, creditosOtorgados = 6, creditosNecesarios = 0)
+  const obj1 = new Materia(cupos = 10, prerrequisitos = #{}, carrera = programacion, estrategia = ordenada, criterio = porPrerrequisitos, año = 1, creditosOtorgados = 6, creditosNecesarios = 0)
+  const obj2 = new Materia(cupos = 3, prerrequisitos = #{obj1, mat1}, carrera = programacion, estrategia = ordenada, criterio = porPrerrequisitos, año = 2, creditosOtorgados = 6, creditosNecesarios = 0)
+  const obj3 = new Materia(cupos = 10, prerrequisitos = #{obj2, bbdd}, carrera = programacion, estrategia = ordenada, criterio = porPrerrequisitos, año = 3, creditosOtorgados = 6, creditosNecesarios = 0)
+  const conc = new Materia(cupos = 10, prerrequisitos = #{obj1, bbdd}, carrera = programacion, estrategia = ordenada, criterio = porPrerrequisitos, año = 2, creditosOtorgados = 6, creditosNecesarios = 0)
+  const quim = new Materia(cupos = 10, prerrequisitos = #{}, carrera = medicina, estrategia = ordenada, criterio = porPrerrequisitos, año = 1, creditosOtorgados = 6, creditosNecesarios = 0)
+  const bio1 = new Materia(cupos = 10, prerrequisitos = #{}, carrera = medicina, estrategia = ordenada, criterio = porPrerrequisitos, año = 1, creditosOtorgados = 6, creditosNecesarios = 0)
+  const bio2 = new Materia(cupos = 10, prerrequisitos = #{bio1}, carrera = medicina, estrategia = ordenada, criterio = porPrerrequisitos, año = 2, creditosOtorgados = 6, creditosNecesarios = 0)
+
   const roque = new Estudiante(carreras = #{programacion, medicina})
   const luisa = new Estudiante(carreras = #{programacion})
   const romina = new Estudiante(carreras = #{programacion})
@@ -24,6 +26,9 @@ describe "Inscripción a materias" {
   const ana = new Estudiante(carreras = #{programacion})
   
   method initialize() {
+    programacion.agregarMaterias(#{elpr, mat1, bbdd, obj1, obj2, obj3, conc})
+    medicina.agregarMaterias(#{quim, bio1, bio2})
+
     roque.aprobar(elpr, 10)
     roque.aprobar(mat1, 8)
     roque.aprobar(obj1, 10)
@@ -47,15 +52,15 @@ describe "Inscripción a materias" {
   }
   
   test "Roque puede inscribirse en Objetos 2, pero no en Objetos 3 (porque le falta Objetos 2) ni en Objetos 1 (porque ya la tiene aprobada)." {
-    assert.that(roque.sePuedeInscribir(obj2))
-    assert.notThat(roque.sePuedeInscribir(obj3))
-    assert.notThat(roque.sePuedeInscribir(obj1))
+    assert.that(obj2.sePuedeInscribir(roque))
+    assert.notThat(obj3.sePuedeInscribir(roque))
+    assert.notThat(obj1.sePuedeInscribir(roque))
   }
   
   test "Roque puede inscribirse: en Programación, en Objetos 2 y Programación Concurrente; en Medicina, en Biología 2." {
-    assert.that(roque.sePuedeInscribir(obj2))
-    assert.that(roque.sePuedeInscribir(conc))
-    assert.that(roque.sePuedeInscribir(bio2))
+    assert.that(obj2.sePuedeInscribir(roque))
+    assert.that(bio2.sePuedeInscribir(roque))
+    assert.that(conc.sePuedeInscribir(roque))
   }
   
   test "Si se inscriben, en este orden, Luisa, Romina, Alicia y Roque en Objetos 2, entonces las tres primeras quedan confirmadas, y Roque queda en lista de espera." {

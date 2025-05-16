@@ -1,0 +1,62 @@
+import estrategias.ordenada
+import criterios.*
+import estudiante.*
+import materia.*
+import carrera.*
+
+describe "Criterios de Inscripción" {
+  const carrera = new Carrera()
+  
+  const mat1 = new Materia(
+    cupos = 1, prerrequisitos = #{}, creditosOtorgados = 6, creditosNecesarios = 0, año = 1,
+    criterio = libre, estrategia = ordenada, carrera = carrera
+  )
+  
+  const mat2 = new Materia(
+    cupos = 1, prerrequisitos = #{mat1}, creditosOtorgados = 6, creditosNecesarios = 0, año = 2,
+    criterio = porPrerrequisitos, estrategia = ordenada, carrera = carrera
+  )
+  
+  const mat3 = new Materia(
+    cupos = 1, prerrequisitos = #{}, creditosOtorgados = 6, creditosNecesarios = 12, año = 2,
+    criterio = porCreditos, estrategia = ordenada, carrera = carrera
+  )
+
+  const estudiante = new Estudiante(carreras = #{carrera})
+
+  method initialize() {
+    carrera.agregarMaterias(#{mat1, mat2, mat3})
+  }
+
+  test "Criterio libre permite inscribirse sin restricciones" {
+    assert.that(libre.estaHabilitado(estudiante, mat1))
+  }
+
+  test "Criterio por prerrequisitos falla si no se aprobaron los prerrequisitos" {
+    assert.notThat(porPrerrequisitos.estaHabilitado(estudiante, mat2))
+  }
+
+  test "Criterio por prerrequisitos funciona si se aprobaron los prerrequisitos" {
+    estudiante.aprobar(mat1, 8)
+    assert.that(porPrerrequisitos.estaHabilitado(estudiante, mat2))
+  }
+
+  test "Criterio por créditos falla si no se tienen créditos suficientes" {
+    assert.notThat(porCreditos.estaHabilitado(estudiante, mat3))
+  }
+
+  test "Criterio por créditos funciona si se tienen créditos suficientes" {
+    estudiante.aprobar(mat1, 8)
+    estudiante.aprobar(mat2, 9)
+    assert.that(porCreditos.estaHabilitado(estudiante, mat3))
+  }
+
+  test "Criterio por año académico falla si no se aprobaron todas las materias del año anterior" {
+    assert.notThat(porAñoAcademico.estaHabilitado(estudiante, mat2))
+  }
+
+  test "Criterio por año académico funciona si se aprobaron todas las materias del año anterior" {
+    estudiante.aprobar(mat1, 8)
+    assert.that(porAñoAcademico.estaHabilitado(estudiante, mat2))
+  }
+}
