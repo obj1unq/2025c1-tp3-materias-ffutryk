@@ -40,8 +40,4 @@ class Estudiante {
   method validarAprobacion(materia) {
     if (self.aprobo(materia)) self.error("El estudiante ya ha aprobado la materia.")
   }
-  
-  method validarInscripcionACarrera(carrera) {
-    if (!carreras.contains(carrera)) self.error("El estudiante no está registrado en la carrera")
-  }
 }
