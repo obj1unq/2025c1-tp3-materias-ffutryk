@@ -1,0 +1,39 @@
+import criterios.*
+import estudiante.*
+import estrategias.*
+import materia.*
+import carrera.*
+
+describe "Estrategias de Lista de Espera" {
+  const programacion = new Carrera()
+  const obj1 = new Materia(cupos = 1, prerrequisitos = #{}, creditosOtorgados = 6, creditosNecesarios = 0, año = 1, criterio = libre, estrategia = ordenada, carrera = programacion)
+  const obj2 = new Materia(cupos = 1, prerrequisitos = #{}, creditosOtorgados = 6, creditosNecesarios = 0, año = 2, criterio = libre, estrategia = ordenada, carrera = programacion)
+  const obj3 = new Materia(cupos = 0, prerrequisitos = #{}, creditosOtorgados = 6, creditosNecesarios = 0, año = 3, criterio = libre, estrategia = ordenada, carrera = programacion)
+
+  const roque = new Estudiante(carreras = #{programacion})
+  const ana = new Estudiante(carreras = #{programacion})
+
+  method initialize() {
+    programacion.agregarMaterias(#{obj1, obj2, obj3})
+
+    roque.aprobar(obj1,10)
+    roque.aprobar(obj2,10)
+
+    ana.aprobar(obj1,9)
+
+    obj3.inscribirEstudiante(ana)
+    obj3.inscribirEstudiante(roque)
+  }
+
+  test "SeleccionElitista selecciona al mejor promedio (roque)" {
+    assert.equals(roque, elitista.seleccionarSiguiente(obj3))
+  }
+
+  test "SeleccionOrdenada selecciona al más antiguo en la lista de espera (ana)" {
+    assert.equals(ana, ordenada.seleccionarSiguiente(obj3))
+  }
+
+  test "SeleccionPorAvance selecciona al que mas materias aprobadas tenga en la carrera(roque)" {
+    assert.equals(roque, porAvance.seleccionarSiguiente(obj3))
+  }
+}

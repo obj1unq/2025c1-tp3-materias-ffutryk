@@ -1,0 +1,65 @@
+import estudiante.*
+import materia.*
+import carrera.*
+import criterios.*
+import estrategias.*
+
+describe "Materia" {
+  const carreraTest = new Carrera()
+  const materia1 = new Materia(cupos = 2, prerrequisitos = #{}, carrera = carreraTest, estrategia = ordenada, criterio = porPrerrequisitos, año = 1, creditosOtorgados = 6, creditosNecesarios = 0)
+  const materia2 = new Materia(cupos = 5, prerrequisitos = #{}, carrera = carreraTest, estrategia = ordenada, criterio = libre, año = 2, creditosOtorgados = 8, creditosNecesarios = 6)
+
+  const estudiante1 = new Estudiante(carreras = #{carreraTest})
+  const estudiante2 = new Estudiante(carreras = #{carreraTest})
+  const estudiante3 = new Estudiante(carreras = #{carreraTest})
+
+  method initialize() {
+    carreraTest.agregarMaterias(#{materia1})
+  }
+
+  test "hayCupoDisponible inicialmente es true" {
+    assert.that(materia1.hayCupoDisponible())
+  }
+
+  test "cantidadDeInscriptos empieza en 0" {
+    assert.equals(0, materia1.cantidadDeInscriptos())
+  }
+
+  test "inscribirEstudiante agrega al estudiante a inscriptos si hay cupo" {
+    materia1.inscribirEstudiante(estudiante1)
+    assert.that(materia1.estaInscripto(estudiante1))
+  }
+
+  test "inscribirEstudiante agrega a lista de espera si no hay cupo" {
+    materia1.inscribirEstudiante(estudiante1)
+    materia1.inscribirEstudiante(estudiante2)
+    materia1.inscribirEstudiante(estudiante3)
+    
+    assert.that(materia1.enListaDeEspera(estudiante3))
+    assert.notThat(materia1.estaInscripto(estudiante3))
+  }
+
+  test "darDeBaja remueve de inscriptos y agrega al primero de la lista de espera (por estrategia ordenada)" {
+    materia1.inscribirEstudiante(estudiante1)
+    materia1.inscribirEstudiante(estudiante2)
+    materia1.inscribirEstudiante(estudiante3)
+
+    materia1.darDeBaja(estudiante1)
+
+    assert.that(materia1.estaInscripto(estudiante3))
+    assert.notThat(materia1.enListaDeEspera(estudiante3))
+  }
+
+  test "tieneCreditosSuficientes devuelve true si estudiante tiene suficientes créditos" {
+    estudiante1.aprobar(materia1, 10)
+    
+
+    carreraTest.agregarMaterias(#{materia2})
+    assert.that(materia2.tieneCreditosSuficientes(estudiante1))
+  }
+
+  test "validarInscripcion lanza error si estudiante no se puede inscribir" {
+    const estudiante = new Estudiante(carreras = #{})
+    assert.throwsException({ => materia1.validarInscripcion(estudiante)})
+  }
+}

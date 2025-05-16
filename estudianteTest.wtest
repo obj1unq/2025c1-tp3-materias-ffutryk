@@ -1,0 +1,82 @@
+import estudiante.*
+import carrera.*
+import materia.*
+import criterios.*
+import estrategias.*
+
+describe "Estudiante" {
+  const carreraTest = new Carrera()
+  const materia1 = new Materia(cupos = 10, prerrequisitos = #{}, carrera = carreraTest, estrategia = ordenada, criterio = porPrerrequisitos, año = 1, creditosOtorgados = 6, creditosNecesarios = 0)
+  const materia2 = new Materia(cupos = 0, prerrequisitos = #{materia1}, carrera = carreraTest, estrategia = ordenada, criterio = porPrerrequisitos, año = 2, creditosOtorgados = 8, creditosNecesarios = 0)
+  const materia3 = new Materia(cupos = 1, prerrequisitos = #{materia1}, carrera = carreraTest, estrategia = ordenada, criterio = porPrerrequisitos, año = 2, creditosOtorgados = 8, creditosNecesarios = 0)
+  const estudiante = new Estudiante(carreras = #{carreraTest})
+
+  method initialize() {
+    carreraTest.agregarMaterias(#{materia1, materia2, materia3})
+    estudiante.aprobar(materia1, 9)
+  }
+
+  test "cantidadDeMateriasAprobadas devuelve 1 al inicio" {
+    assert.equals(1, estudiante.cantidadDeMateriasAprobadas())
+  }
+
+  test "promedio devuelve nota correcta" {
+    assert.equals(9, estudiante.promedio())
+  }
+
+  test "aprobo reconoce materias aprobadas" {
+    assert.that(estudiante.aprobo(materia1))
+    assert.notThat(estudiante.aprobo(materia2))
+  }
+
+  test "materiasDeLasCarreras incluye las materias de la carrera" {
+    assert.equals(#{materia1, materia2, materia3}, estudiante.materiasDeLasCarreras())
+  }
+
+  test "esMateriaDeUnaCarreraQueCursa devuelve true para materias de sus carreras" {
+    assert.that(estudiante.esMateriaDeUnaCarreraQueCursa(materia1))
+  }
+
+  test "aproboTodosLosPrerrequisitosDe devuelve true si ya aprobó los requisitos" {
+    assert.that(estudiante.aproboTodosLosPrerrequisitosDe(materia2))
+  }
+
+  test "materiasEnLasQueEstaInscripto detecta inscripción en materias" {
+    materia3.inscribirEstudiante(estudiante)
+    assert.equals(#{materia3}, estudiante.materiasEnLasQueEstaInscripto())
+  }
+
+  test "materiasEnLasQueEstaEnEspera detecta espera correctamente" {
+    materia2.inscribirEstudiante(estudiante)
+
+    assert.that(estudiante.materiasEnLasQueEstaEnEspera().contains(materia2))
+  }
+
+  test "materiasALasQueSePuedeInscribir retorna materias válidas" {
+    assert.that(estudiante.materiasALasQueSePuedeInscribir(carreraTest).contains(materia2))
+  }
+
+  test "cantidadDeAprobadasDeLaCarrera cuenta solo las aprobadas de la carrera" {
+    assert.equals(1, estudiante.cantidadDeAprobadasDeLaCarrera(carreraTest))
+  }
+
+  test "materiasAprobadasDeLaCarrera retorna materias aprobadas correctas" {
+    assert.equals(#{materia1}, estudiante.materiasAprobadasDeLaCarrera(carreraTest))
+  }
+
+  test "creditosTotales suma créditos correctamente" {
+    assert.equals(6, estudiante.creditosTotales())
+  }
+
+  test "materiasDelAñoAnterior filtra correctamente por año" {
+    assert.equals(#{materia1}, estudiante.materiasDelAñoAnterior(2))
+  }
+
+  test "aproboTodasLasMateriasDelAñoAnterior retorna true si están aprobadas" {
+    assert.that(estudiante.aproboTodasLasMateriasDelAñoAnterior(2))
+  }
+
+  test "validarAprobacion lanza error si intenta aprobar la misma materia dos veces" {
+    assert.throwsException({ => estudiante.aprobar(materia1, 9)})
+  }
+}
